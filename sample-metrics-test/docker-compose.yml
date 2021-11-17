@@ -1,6 +1,5 @@
 volumes:
   victoria-volume:
-  prometheus-volume:
 services:
   victoriametrics:
     image: victoriametrics/victoria-metrics
@@ -11,18 +10,17 @@ services:
       - "8428"
     volumes:
       - victoria-volume:/victoria-metrics-data
-  prometheus:
-    image: prom/prometheus
-    command: [ "--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--web.console.libraries=/usr/share/prometheus/console_libraries", "--web.console.templates=/usr/share/prometheus/consoles", "--query.lookback-delta=30d", "--web.enable-admin-api" ]
+  vmagent:
+    image: victoriametrics/vmagent
+    command: ["-promscrape.config=/etc/prometheus/prometheus.yml", "-remoteWrite.url=http://host.docker.internal:8428/api/v1/write"]
     ports:
-      - "9090:9090"
+      - "8429:8429"
     expose:
-      - "9090"
+      - "8429"
     volumes:
       - type: bind
         source: ./prometheus/prometheus.yaml
         target: /etc/prometheus/prometheus.yml
-      - prometheus-volume:/prometheus
   sample-metrics-test:
     build: .
     ports:
