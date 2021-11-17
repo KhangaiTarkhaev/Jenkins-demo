@@ -1,0 +1,31 @@
+volumes:
+  victoria-volume:
+  prometheus-volume:
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics
+    command: [ "-retentionPeriod=30d", "-search.maxLookback=720h" ]
+    ports:
+      - "8428:8428"
+    expose:
+      - "8428"
+    volumes:
+      - victoria-volume:/victoria-metrics-data
+  prometheus:
+    image: prom/prometheus
+    command: [ "--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--web.console.libraries=/usr/share/prometheus/console_libraries", "--web.console.templates=/usr/share/prometheus/consoles", "--query.lookback-delta=30d", "--web.enable-admin-api" ]
+    ports:
+      - "9090:9090"
+    expose:
+      - "9090"
+    volumes:
+      - type: bind
+        source: ./prometheus/prometheus.yaml
+        target: /etc/prometheus/prometheus.yml
+      - prometheus-volume:/prometheus
+  sample-metrics-test:
+    build: .
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
