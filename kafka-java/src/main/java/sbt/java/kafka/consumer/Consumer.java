@@ -13,10 +13,6 @@ public class Consumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Consumer.class);
 
-    private CountDownLatch latch = new CountDownLatch(1);
-    private String payload = null;
-
-
     @KafkaListener(topicPattern = "topicName", groupId = "myGroupId")
     public void consume(ConsumerRecord<?, ?> consumerRecord) {
         LOGGER.info("received payload='{}'", consumerRecord.toString());
