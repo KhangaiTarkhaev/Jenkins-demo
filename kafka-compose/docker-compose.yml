@@ -1,57 +1,99 @@
 version: "2"
 volumes:
+  zookeeper1_data:
+  zookeeper2_data:
+  zookeeper3_data:
   kafka1volume:
   kafka2volume:
   kafka3volume:
 services:
   zookeeper1:
     image: bitnami/zookeeper
+    container_name: zookeper1
     environment:
-      ALLOW_ANONYMOUS_LOGIN: "yes"
+      - ZOO_SERVER_ID=1
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_SERVERS=zookeeper1:2888:3888::1,zookeeper2:2888:3888::2,zookeeper3:2888:3888::3
     ports:
-      - "2181:2181"
+      - '2181'
+      - '2888'
+      - '3888'
+    volumes:
+      - zookeeper1_data:/bitnami
+  zookeeper2:
+    image: bitnami/zookeeper
+    container_name: zookeper2
+    ports:
+      - '2181'
+      - '2888'
+      - '3888'
+    volumes:
+      - zookeeper2_data:/bitnami
+    environment:
+      - ZOO_SERVER_ID=2
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_SERVERS=zookeeper1:2888:3888::1,zookeeper2:2888:3888::2,zookeeper3:2888:3888::3
+  zookeeper3:
+    image: bitnami/zookeeper
+    container_name: zookeper3
+    ports:
+      - '2181'
+      - '2888'
+      - '3888'
+    volumes:
+      - zookeeper3_data:/bitnami
+    environment:
+      - ZOO_SERVER_ID=3
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_SERVERS=zookeeper1:2888:3888::1,zookeeper2:2888:3888::2,zookeeper3:2888:3888::3
   kafka1:
     image: bitnami/kafka
     container_name: kafka1
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       - KAFKA_CFG_BROKER_ID=1
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092
     ports:
       - "9092"
     depends_on:
-      - zookeeper
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
     volumes:
-      - kafka1volume
+      - kafka1volume:/bitnami
   kafka2:
     image: bitnami/kafka
     container_name: kafka2
     environment:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9092
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       - KAFKA_CFG_BROKER_ID=2
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
-      - zookeeper
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
     ports:
       - "9092"
     volumes:
-      - kafka2volume
+      - kafka2volume:/bitnami
   kafka3:
     image: bitnami/kafka
     container_name: kafka3
     environment:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9092
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       - KAFKA_CFG_BROKER_ID=3
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
-      - zookeeper
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
     ports:
       - "9092"
     volumes:
-      - kafka3volume
+      - kafka3volume:/bitnami
   spring-app:
     build:
       context: ./sample-kafka-producer
@@ -60,7 +102,9 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - zookeeper
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
       - kafka1
       - kafka2
       - kafka3
