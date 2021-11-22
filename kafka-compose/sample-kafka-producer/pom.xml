@@ -15,8 +15,16 @@
     <description>sample-kafka-producer</description>
     <properties>
         <java.version>11</java.version>
-        <sonar.login>b3a27071e772008b810fe6de0746ec2886a3c214</sonar.login>
+        <sonar.login>ff9c200c00a86d8328b949cfcf832d1ca0f8e8a2</sonar.login>
     </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://host.docker.internal:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -71,6 +79,18 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -99,7 +119,7 @@
         <profile>
             <id>docker</id>
             <properties>
-                <docker.registry.path>localhost:5000</docker.registry.path>
+                <docker.registry.path>host.docker.internal:5000</docker.registry.path>
             </properties>
             <build>
                 <plugins>
