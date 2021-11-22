@@ -119,7 +119,7 @@
         <profile>
             <id>docker</id>
             <properties>
-                <docker.registry.path>127.0.0.1</docker.registry.path>
+                <docker.registry.path>host.docker.internal</docker.registry.path>
             </properties>
             <build>
                 <plugins>
