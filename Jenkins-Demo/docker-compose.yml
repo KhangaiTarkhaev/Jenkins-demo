@@ -1,0 +1,64 @@
+version: '3.0'
+
+#  docker run --name jenkins-docker --rm --detach \
+#  --privileged --network jenkins --network-alias docker \
+#  --env DOCKER_TLS_CERTDIR=/certs \
+#  --volume jenkins-docker-certs:/certs/client \
+#  --volume jenkins-data:/var/jenkins_home \
+#  --publish 2376:2376 docker:dind --storage-driver overlay2
+
+networks:
+  jenkins:
+    external: true
+volumes:
+  nexus-data:
+    external: true
+  jenkins-data:
+    external: true
+  jenkins-docker-certs:
+    external: true
+services:
+#  jenkins-docker:
+#    networks:
+#      jenkins:
+#        aliases:
+#          - docker
+#    image: docker:dind
+#    environment:
+#      - DOCKER_TLS_CERTDIR=/certs
+#    volumes:
+#      - jenkins-data:/var/jenkins_home
+#      - jenkins-docker-certs:/certs/client
+#    ports:
+#      - "2376:2376"
+  jenkins:
+    image: localhost:5000/myjenkins-blueocean:1.1
+    container_name: jenkins-blueocean
+    networks:
+      - jenkins
+    environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+  sonarqube:
+    image: sonarqube
+    container_name: sonarqube
+    networks:
+      - jenkins
+    ports:
+      - "9000:9000"
+  nexus:
+    image: sonatype/nexus3
+    container_name: nexus
+    volumes:
+      - nexus-data:/nexus-data
+    networks:
+      - jenkins
+    ports:
+      - "8081:8081"
