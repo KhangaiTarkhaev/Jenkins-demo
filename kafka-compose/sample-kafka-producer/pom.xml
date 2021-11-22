@@ -21,7 +21,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>nexus-snapshots</id>
-            <url>http://host.docker.internal:8081/repository/maven-snapshots/</url>
+            <url>http://docker.host.internal:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -119,7 +119,7 @@
         <profile>
             <id>docker</id>
             <properties>
-                <docker.registry.path>host.docker.internal:5000</docker.registry.path>
+                <docker.registry.path>localhost:5000</docker.registry.path>
             </properties>
             <build>
                 <plugins>
