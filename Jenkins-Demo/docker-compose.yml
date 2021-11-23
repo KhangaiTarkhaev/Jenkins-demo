@@ -18,20 +18,22 @@ volumes:
   jenkins-docker-certs:
     external: true
 services:
-#  jenkins-docker:
-#    networks:
-#      jenkins:
-#        aliases:
-#          - docker
-#    image: docker:dind
-#    environment:
-#      - DOCKER_TLS_CERTDIR=/certs
-#    volumes:
-#      - jenkins-data:/var/jenkins_home
-#      - jenkins-docker-certs:/certs/client
-#    ports:
-#      - "2376:2376"
+  jenkins-docker:
+    privileged: true
+    networks:
+      jenkins:
+        aliases:
+          - docker
+    image: docker:dind
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client
+    ports:
+      - "2376:2376"
   jenkins:
+    privileged: true
     image: localhost:5000/myjenkins-blueocean:1.1
     container_name: jenkins-blueocean
     networks:
@@ -49,8 +51,6 @@ services:
   sonarqube:
     image: sonarqube
     container_name: sonarqube
-    networks:
-      - jenkins
     ports:
       - "9000:9000"
   nexus:
@@ -58,7 +58,5 @@ services:
     container_name: nexus
     volumes:
       - nexus-data:/nexus-data
-    networks:
-      - jenkins
     ports:
       - "8081:8081"
